@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import co.jacobcloldev.apps.themoviecl.R
 import co.jacobcloldev.apps.themoviecl.core.BaseViewHolder
 import co.jacobcloldev.apps.themoviecl.data.model.Movie
 import co.jacobcloldev.apps.themoviecl.databinding.ItemRowMovieBinding
@@ -33,7 +34,7 @@ class MainAdapter(private val context: Context, private val moviesList: List<Mov
         BaseViewHolder<Movie>(binding.root) {
         override fun bind(item: Movie, position: Int): Unit = with(binding) {
             val urlImage = "https://image.tmdb.org/t/p/w500${item.posterPath}"
-            Glide.with(context).load(urlImage).into(thumbnail)
+            Glide.with(context).load(urlImage).placeholder(R.drawable.load).into(thumbnail)
             title.text = item.originalTitle
             rating.text = item.voteAverage.toString()
             itemView.setOnClickListener { itemClickListener.onMovieClick(item.id) }

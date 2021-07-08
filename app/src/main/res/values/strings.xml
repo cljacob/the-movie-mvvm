@@ -12,4 +12,10 @@
     <string name="pref_highest_rated">Highest Rated</string>
     <string name="preview_page">Preview Page</string>
     <string name="next_page">Next Page</string>
+    <string name="action_favorite">My Favorites movies</string>
+    <string name="action_most_popular">Most popular movies</string>
+    <string name="budget">Budget</string>
+    <string name="home_page">Home Page</string>
+    <string name="trailler">See Trailler</string>
+    <string name="teaser">See Teaser</string>
 </resources>

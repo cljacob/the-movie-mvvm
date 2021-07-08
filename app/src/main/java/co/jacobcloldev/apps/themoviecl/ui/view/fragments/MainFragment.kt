@@ -3,9 +3,7 @@ package co.jacobcloldev.apps.themoviecl.ui.view.fragments
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -65,6 +63,7 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
         setupRecyclerView()
         setupObserver()
         setSwipeRefreshLayout()
@@ -76,6 +75,60 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.main, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.action_favorite ->{
+
+            }
+            R.id.action_most_popular ->{
+
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onMovieClick(idMovie: Long) {
+        val bundle = Bundle()
+        bundle.putLong("idMovie", idMovie)
+        findNavController().navigate(R.id.action_mainFragment_to_detailFragment, bundle)
+    }
+
+    override fun onClick(v: View?) {
+        when(v!!.id){
+            R.id.bnPreview -> {
+                if (page == 1) {
+                    binding.bnPreview.isEnabled = false
+                    configureButtonPreview(R.color.grey)
+                }else {
+                    page -= 1
+                    viewModel.setPage(page)
+                    configureButtonPreview(R.color.purple_500)
+                }
+            }
+            R.id.bnNext -> {
+                page += 1
+                viewModel.setPage(page)
+                binding.bnPreview.isEnabled = true
+                configureButtonPreview(R.color.purple_500)
+            }
+        }
+    }
+
+    private fun configureButtonPreview(color: Int){
+        binding.bnPreview.setBackgroundColor(
+            ContextCompat.getColor(
+                requireContext(),
+                color
+            )
+        )
     }
 
     private fun setupRecyclerView() {
@@ -91,8 +144,18 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
         swipeRefreshLayout = binding.swipeRefreshLayout
         swipeRefreshLayout.setOnRefreshListener {
             viewModel.setPage(page)
-            swipeRefreshLayout.isRefreshing = false
         }
+    }
+
+    private fun setUpToobar() {
+        val mainActivity = mActivity as MainActivity
+        val toolbar = binding.toolbar
+        mainActivity.setSupportActionBar(toolbar)
+
+        val navController = NavHostFragment.findNavController(this)
+        NavigationUI.setupActionBarWithNavController(mainActivity, navController)
+        mainActivity.supportActionBar?.setHomeButtonEnabled(true)
+        mainActivity.supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     private fun setupObserver() {
@@ -107,6 +170,9 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
                     if (!listMovies.isNullOrEmpty()) {
                         binding.rvPopularMovies.adapter =
                             MainAdapter(requireContext(), listMovies, this)
+                        if (swipeRefreshLayout.isRefreshing){
+                            swipeRefreshLayout.isRefreshing = false
+                        }
                     }
                 }
                 is Resource.Failure -> {
@@ -122,55 +188,4 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
         })
     }
 
-    override fun onMovieClick(idMovie: Long) {
-        val bundle = Bundle()
-        bundle.putLong("idMovie", idMovie)
-        findNavController().navigate(R.id.action_mainFragment_to_detailFragment, bundle)
-    }
-
-    private fun setUpToobar() {
-        val mainActivity = mActivity as MainActivity
-        val toolbar = binding.toolbar
-        mainActivity.setSupportActionBar(toolbar)
-
-        val navController = NavHostFragment.findNavController(this)
-        NavigationUI.setupActionBarWithNavController(mainActivity, navController)
-        mainActivity.supportActionBar?.setHomeButtonEnabled(true)
-        mainActivity.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
-
-    override fun onClick(v: View?) {
-       when(v!!.id){
-           R.id.bnPreview -> {
-               if (page == 1) {
-                   binding.bnPreview.isEnabled = false
-                   binding.bnPreview.setBackgroundColor(
-                       ContextCompat.getColor(
-                           requireContext(),
-                           R.color.grey
-                       )
-                   )
-               }else {
-                   page =- 1
-                   viewModel.setPage(page)
-                   binding.bnPreview.setBackgroundColor(
-                       ContextCompat.getColor(
-                           requireContext(),
-                           R.color.purple_500
-                       )
-                   )
-               }
-           }
-           R.id.bnNext -> {
-               page =+ 1
-               viewModel.setPage(page)
-               binding.bnPreview.setBackgroundColor(
-                   ContextCompat.getColor(
-                       requireContext(),
-                       R.color.purple_500
-                   )
-               )
-           }
-       }
-    }
 }

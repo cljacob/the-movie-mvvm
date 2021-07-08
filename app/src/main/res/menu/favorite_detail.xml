@@ -6,12 +6,7 @@
         android:id="@+id/action_favorite"
         android:orderInCategory="100"
         android:title="@string/action_favorite"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_saved_movies"
-        android:orderInCategory="100"
-        android:title="@string/action_movies_saved"
-        app:showAsAction="never"/>
+        android:icon="@drawable/ic_favorite_border"
+        app:showAsAction="always"/>
 
 </menu>

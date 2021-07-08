@@ -18,4 +18,6 @@
     <string name="home_page">Home Page</string>
     <string name="trailler">See Trailler</string>
     <string name="teaser">See Teaser</string>
+    <string name="action_movies_saved">The movies saved</string>
+    <string name="vote_count">Vote count higher than 2000</string>
 </resources>

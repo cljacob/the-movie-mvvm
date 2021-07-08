@@ -3,6 +3,8 @@ package co.jacobcloldev.apps.themoviecl.ui.view.adapters
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import co.jacobcloldev.apps.themoviecl.R
 import co.jacobcloldev.apps.themoviecl.core.BaseViewHolder
@@ -10,8 +12,14 @@ import co.jacobcloldev.apps.themoviecl.data.model.Movie
 import co.jacobcloldev.apps.themoviecl.databinding.ItemRowMovieBinding
 import com.bumptech.glide.Glide
 
-class MainAdapter(private val context: Context, private val moviesList: List<Movie>, private val itemClickListener: OnMovieClickListener) :
+class MainAdapter(private val context: Context, private val moviesList: ArrayList<Movie>, private val itemClickListener: OnMovieClickListener) :
     RecyclerView.Adapter<BaseViewHolder<*>>() {
+
+    var moviesFilterList = ArrayList<Movie>()
+
+    init {
+        moviesFilterList = moviesList
+    }
 
     interface OnMovieClickListener{
         fun onMovieClick(idMovie: Long)
@@ -40,4 +48,5 @@ class MainAdapter(private val context: Context, private val moviesList: List<Mov
             itemView.setOnClickListener { itemClickListener.onMovieClick(item.id) }
         }
     }
+
 }

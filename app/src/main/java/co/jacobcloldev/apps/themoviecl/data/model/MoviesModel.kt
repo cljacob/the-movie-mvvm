@@ -26,13 +26,16 @@ data class Movie(
     @SerializedName("poster_path")
     val posterPath: String,
 
-    val title: String,
-
     @SerializedName("vote_average")
     val voteAverage: Double,
+
+    @SerializedName( "vote_count")
+    val voteCount: Long
 )
 
 data class DetailMovie(
+
+    val id: Long,
 
     @SerializedName("backdrop_path")
     val backdropPath: String,
@@ -58,7 +61,11 @@ data class DetailMovie(
     @SerializedName("vote_average")
     val voteAverage: Double,
 
-    val homepage: String
+    val homepage: String,
+
+    @SerializedName( "vote_count")
+    val voteCount: Long
+
 )
 
 data class VideoMovie(
@@ -72,3 +79,4 @@ data class Video (
     val site: String,
     val type: String
 )
+

@@ -3,6 +3,7 @@ package co.jacobcloldev.apps.themoviecl.domain
 import co.jacobcloldev.apps.themoviecl.core.Resource
 import co.jacobcloldev.apps.themoviecl.data.model.DetailMovie
 import co.jacobcloldev.apps.themoviecl.data.model.Movie
+import co.jacobcloldev.apps.themoviecl.data.model.MovieEntity
 import co.jacobcloldev.apps.themoviecl.data.model.VideoMovie
 
 interface Repository {
@@ -12,4 +13,11 @@ interface Repository {
 
     suspend fun getVideoMovie(idMovie: Long, apiKey: String): Resource<VideoMovie>
 
+    suspend fun getMovieSaved(): Resource<List<MovieEntity>>
+
+    suspend fun getMovieFavorite(): Resource<List<MovieEntity>>
+
+    suspend fun insetMovie(movie: MovieEntity)
+
+    suspend fun updateMovie(isFavorite: Boolean, idMovie: Long)
 }

@@ -5,12 +5,12 @@ import android.content.Intent
 import android.graphics.Paint
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.NavHostFragment
@@ -18,7 +18,10 @@ import androidx.navigation.ui.NavigationUI
 import co.jacobcloldev.apps.themoviecl.R
 import co.jacobcloldev.apps.themoviecl.core.Resource
 import co.jacobcloldev.apps.themoviecl.core.VMFactory
+import co.jacobcloldev.apps.themoviecl.data.db.AppDataBase
 import co.jacobcloldev.apps.themoviecl.data.model.DetailMovie
+import co.jacobcloldev.apps.themoviecl.data.model.Movie
+import co.jacobcloldev.apps.themoviecl.data.model.MovieEntity
 import co.jacobcloldev.apps.themoviecl.data.model.VideoMovie
 import co.jacobcloldev.apps.themoviecl.data.network.MovieServices
 import co.jacobcloldev.apps.themoviecl.databinding.FragmentDetailBinding
@@ -30,7 +33,13 @@ import com.google.android.material.appbar.AppBarLayout
 
 class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.OnClickListener {
 
-    private val viewModel by viewModels<MainViewModel> { VMFactory(ImplementationRepo(MovieServices())) }
+    private val viewModel by activityViewModels<MainViewModel> {
+        VMFactory(
+            ImplementationRepo(
+                MovieServices(AppDataBase.getDataBase(requireActivity().applicationContext))
+            )
+        )
+    }
 
     private var _binding: FragmentDetailBinding? = null
     private val binding get() = _binding!!
@@ -43,6 +52,10 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
     private var scrollRange = -1
     private var urlTriller = ""
     private var urlTeaser = ""
+
+    private lateinit var movie: DetailMovie
+
+    private var flagFavorite = false
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -69,6 +82,7 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
         setupObserver()
         setUpToobar()
         initCollapsingToolbar()
@@ -82,11 +96,36 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
         _binding = null
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.favorite_detail, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_favorite -> {
+                val favorite = ContextCompat.getDrawable(requireContext(), R.drawable.ic_favorite)
+                val unFavorite =
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_favorite_border)
+                if (flagFavorite) {
+                    item.icon = unFavorite
+                    updateMovie(false)
+                    flagFavorite = false
+                } else {
+                    item.icon = favorite
+                    updateMovie(true)
+                    flagFavorite = true
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
-        if (scrollRange == -1){
+        if (scrollRange == -1) {
             scrollRange = appBarLayout?.totalScrollRange ?: -1
         }
-        if (scrollRange + verticalOffset == 0){
+        if (scrollRange + verticalOffset == 0) {
             binding.collapsingToolbar.title = getString(R.string.movie_detail)
             isShow = true
         } else {
@@ -97,20 +136,20 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
 
 
     override fun onClick(v: View?) {
-        when(v!!.id){
-            R.id.bnTrailler ->{
-               openIntenActionView(urlTriller)
+        when (v!!.id) {
+            R.id.bnTrailler -> {
+                openIntenActionView(urlTriller)
             }
-            R.id.bnTeaser ->{
+            R.id.bnTeaser -> {
                 openIntenActionView(urlTeaser)
             }
-            R.id.txHomePage->{
+            R.id.txHomePage -> {
                 openIntenActionView(binding.txHomePage.text.toString())
             }
         }
     }
 
-    private fun openIntenActionView(url: String,){
+    private fun openIntenActionView(url: String) {
         val uri = Uri.parse(url)
         val intent = Intent(Intent.ACTION_VIEW, uri)
         startActivity(intent)
@@ -141,7 +180,7 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
                 }
                 is Resource.Success -> {
                     binding.progressBar.visibility = View.GONE
-                    val movie = result.data as DetailMovie
+                    movie = result.data as DetailMovie
 
                     val urlImage = "https://image.tmdb.org/t/p/w500${movie.posterPath}"
                     Glide.with(requireContext()).load(urlImage).placeholder(R.drawable.load)
@@ -168,7 +207,7 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
         })
     }
 
-    private fun getVideoMovie(){
+    private fun getVideoMovie() {
         viewModel.fetchVideoMovie.observe(viewLifecycleOwner, Observer { result ->
             when (result) {
                 is Resource.Loading -> {
@@ -177,10 +216,10 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
                 is Resource.Success -> {
                     binding.progressBar.visibility = View.GONE
                     val videoMovie = result.data as VideoMovie
-                    if (!videoMovie.results.isNullOrEmpty()){
-                        for (item in videoMovie.results){
-                            if (item.site == "YouTube"){
-                                when(item.type){
+                    if (!videoMovie.results.isNullOrEmpty()) {
+                        for (item in videoMovie.results) {
+                            if (item.site == "YouTube") {
+                                when (item.type) {
                                     "Trailer" -> {
                                         binding.bnTrailler.visibility = View.VISIBLE
                                         urlTriller = "https://www.youtube.com/watch?v=${item.key}"
@@ -192,6 +231,7 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
                                 }
                             }
                         }
+                        saveMovie()
                     }
                 }
                 is Resource.Failure -> {
@@ -206,4 +246,33 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
         })
     }
 
+    private fun saveMovie() {
+        viewModel.saveMovie(
+            MovieEntity(
+                movie.id,
+                movie.backdropPath,
+                movie.budget,
+                movie.originalLanguage,
+                movie.originalTitle,
+                movie.overview,
+                movie.posterPath,
+                movie.releaseDate,
+                urlTriller,
+                urlTeaser,
+                movie.voteAverage,
+                movie.homepage,
+                false,
+                movie.voteCount
+            )
+        )
+        Toast.makeText(
+            requireContext(),
+            "The movie was save.",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun updateMovie(isFavorite: Boolean) {
+        viewModel.updataMovie(isFavorite, movie.id)
+    }
 }

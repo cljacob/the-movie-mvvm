@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient{
 
-    val webservice by lazy {
+    /*val webservice by lazy {
 
         val logging = HttpLoggingInterceptor()
         logging.level = HttpLoggingInterceptor.Level.BODY
@@ -26,5 +26,13 @@ object RetrofitClient{
             .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
             .client(okhttpClientBuilder.build())
             .build().create(MovieApiClient::class.java)
+    }*/
+
+    fun getRetrofit(): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://api.themoviedb.org/3/movie/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
     }
+
 }

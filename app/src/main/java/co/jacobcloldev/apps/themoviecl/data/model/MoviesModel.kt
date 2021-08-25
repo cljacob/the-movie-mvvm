@@ -14,7 +14,6 @@ data class MoviesModel(
 )
 
 data class Movie(
-
     @SerializedName("backdrop_path")
     val backdropPath: String? = null,
 

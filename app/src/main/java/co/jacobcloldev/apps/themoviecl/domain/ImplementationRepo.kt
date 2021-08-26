@@ -9,15 +9,15 @@ import co.jacobcloldev.apps.themoviecl.data.network.MovieServices
 
 class ImplementationRepo(private val dataSource: MovieServices) : Repository {
 
-    override suspend fun getPopularsMovies(apiKey: String, page: Int): Resource<List<Movie>> {
+    override suspend fun getPopularsMovies(apiKey: String, page: Int): List<Movie> {
         return dataSource.getPopularMovier(apiKey, page)
     }
 
-    override suspend fun getDetailMovie(idMovie: Long, apiKey: String): Resource<DetailMovie> {
+    override suspend fun getDetailMovie(idMovie: Long, apiKey: String): DetailMovie {
         return dataSource.getDetailMovie(idMovie, apiKey)
     }
 
-    override suspend fun getVideoMovie(idMovie: Long, apiKey: String): Resource<VideoMovie> {
+    override suspend fun getVideoMovie(idMovie: Long, apiKey: String): VideoMovie {
         return dataSource.getVideoMovie(idMovie, apiKey)
     }
 

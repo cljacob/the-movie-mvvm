@@ -6,7 +6,6 @@ import co.jacobcloldev.apps.themoviecl.core.Resource
 import co.jacobcloldev.apps.themoviecl.data.model.MovieEntity
 import co.jacobcloldev.apps.themoviecl.domain.Repository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class MainViewModel(private val repo: Repository): ViewModel() {
 
@@ -61,7 +60,7 @@ class MainViewModel(private val repo: Repository): ViewModel() {
         }
     }
 
-    fun saveMovie(movie: MovieEntity){
+  /*  fun saveMovie(movie: MovieEntity){
         viewModelScope.launch {
             repo.insetMovie(movie)
         }
@@ -71,7 +70,7 @@ class MainViewModel(private val repo: Repository): ViewModel() {
         viewModelScope.launch {
             repo.updateMovie(isFavorite, idMovie)
         }
-    }
+    }*/
 
     fun getMovieSaved() = liveData(Dispatchers.IO) {
         emit(Resource.Loading())

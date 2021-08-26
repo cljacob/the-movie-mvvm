@@ -7,11 +7,11 @@ import co.jacobcloldev.apps.themoviecl.data.model.MovieEntity
 import co.jacobcloldev.apps.themoviecl.data.model.VideoMovie
 
 interface Repository {
-    suspend fun getPopularsMovies(apiKey: String, page: Int): Resource<List<Movie>>
+    suspend fun getPopularsMovies(apiKey: String, page: Int): List<Movie>
 
-    suspend fun getDetailMovie(idMovie: Long, apiKey: String): Resource<DetailMovie>
+    suspend fun getDetailMovie(idMovie: Long, apiKey: String): DetailMovie
 
-    suspend fun getVideoMovie(idMovie: Long, apiKey: String): Resource<VideoMovie>
+    suspend fun getVideoMovie(idMovie: Long, apiKey: String): VideoMovie
 
     suspend fun getMovieSaved(): Resource<List<MovieEntity>>
 

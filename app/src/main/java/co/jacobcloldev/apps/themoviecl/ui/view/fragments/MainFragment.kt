@@ -5,14 +5,12 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.*
 import android.widget.CompoundButton
-import android.widget.RadioGroup
-import android.widget.Switch
 import android.widget.Toast
-import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
@@ -35,7 +33,7 @@ import co.jacobcloldev.apps.themoviecl.ui.viewmodel.MainViewModel
 
 class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
-    private val viewModel by activityViewModels<MainViewModel> {
+   /* private val viewModel by activityViewModels<MainViewModel> {
         VMFactory(
             ImplementationRepo(
                 MovieServices(
@@ -43,7 +41,9 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
                 )
             )
         )
-    }
+    }*/
+
+    private val movieViewModel: MovieViewModel by viewModels()
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
@@ -86,6 +86,8 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
         binding.bnPreview.setOnClickListener(this)
         binding.bnNext.setOnClickListener(this)
         binding.swFilter.setOnCheckedChangeListener(this)
+
+        movieViewModel.
     }
 
     override fun onDestroyView() {
@@ -126,13 +128,15 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
                     configureButtonPreview(R.color.grey)
                 } else {
                     page -= 1
-                    viewModel.setPage(page)
+                    movieViewModel.setPage(page)
+                    movieViewModel.getMoviesUseCase
                     configureButtonPreview(R.color.purple_500)
                 }
             }
             R.id.bnNext -> {
                 page += 1
-                viewModel.setPage(page)
+                movieViewModel.setPage(page)
+                movieViewModel.getMoviesUseCase
                 binding.bnPreview.isEnabled = true
                 configureButtonPreview(R.color.purple_500)
                 if (page == 1) {

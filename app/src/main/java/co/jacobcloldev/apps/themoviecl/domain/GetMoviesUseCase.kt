@@ -1,12 +1,10 @@
 package co.jacobcloldev.apps.themoviecl.domain
 
-import co.jacobcloldev.apps.themoviecl.data.MovieRepository
+
+import co.jacobcloldev.apps.themoviecl.data.ImplementationRepo
 import co.jacobcloldev.apps.themoviecl.data.model.Movie
+import javax.inject.Inject
 
-class GetMoviesUseCase {
-
-    private val repository = MovieRepository()
-
-    suspend operator fun invoke(apiKey: String, page: Int): List<Movie> = repository.getPopularsMovies(apiKey, page)
-
+class GetMoviesUseCase @Inject constructor(private val repository : ImplementationRepo) {
+    suspend operator fun invoke(page: Int): List<Movie> = repository.getPopularsMovies(page)
 }

@@ -8,38 +8,25 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import co.jacobcloldev.apps.themoviecl.R
-import co.jacobcloldev.apps.themoviecl.core.Resource
-import co.jacobcloldev.apps.themoviecl.core.VMFactory
-import co.jacobcloldev.apps.themoviecl.data.db.AppDataBase
 import co.jacobcloldev.apps.themoviecl.data.model.DetailMovie
-import co.jacobcloldev.apps.themoviecl.data.model.Movie
 import co.jacobcloldev.apps.themoviecl.data.model.MovieEntity
-import co.jacobcloldev.apps.themoviecl.data.model.VideoMovie
-import co.jacobcloldev.apps.themoviecl.data.network.MovieServices
 import co.jacobcloldev.apps.themoviecl.databinding.FragmentDetailBinding
-import co.jacobcloldev.apps.themoviecl.domain.ImplementationRepo
 import co.jacobcloldev.apps.themoviecl.ui.view.MainActivity
-import co.jacobcloldev.apps.themoviecl.ui.viewmodel.MainViewModel
+import co.jacobcloldev.apps.themoviecl.ui.view.fragments.viewmodel.DetailViewModel
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
 
 class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.OnClickListener {
 
-    private val viewModel by activityViewModels<MainViewModel> {
-        VMFactory(
-            ImplementationRepo(
-                MovieServices(AppDataBase.getDataBase(requireActivity().applicationContext))
-            )
-        )
-    }
+    private val detailViewModel: DetailViewModel by viewModels()
 
     private var _binding: FragmentDetailBinding? = null
     private val binding get() = _binding!!
@@ -83,12 +70,56 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
-        setupObserver()
         setUpToobar()
         initCollapsingToolbar()
         binding.txHomePage.setOnClickListener(this)
         binding.bnTeaser.setOnClickListener(this)
         binding.bnTrailler.setOnClickListener(this)
+
+        detailViewModel.detailMovie.observe(viewLifecycleOwner, Observer {
+            val urlImage = "https://image.tmdb.org/t/p/w500${it.posterPath}"
+            Glide.with(requireContext()).load(urlImage).placeholder(R.drawable.load)
+                .into(binding.thumbnailImageheader)
+
+            binding.txTitle.text = it.originalTitle
+            binding.txPlotSynopsis.text = it.overview
+            binding.txReleaseDate.text = it.releaseDate
+            binding.txUserRating.text = it.voteAverage.toString()
+            binding.txBudget.text = it.budget.toString()
+            binding.txHomePage.text = it.homepage
+            binding.txHomePage.paintFlags = Paint.UNDERLINE_TEXT_FLAG
+
+            movie = it
+
+            detailViewModel.fetchVideoMovie()
+        })
+
+        detailViewModel.isLoading.observe(viewLifecycleOwner, Observer {
+            binding.progressBar.isVisible = it
+        })
+
+        detailViewModel.videMovieUrl.observe(viewLifecycleOwner, Observer {
+            if (!it.results.isNullOrEmpty()) {
+                for (item in it.results) {
+                    if (item.site == "YouTube") {
+                        when (item.type) {
+                            "Trailer" -> {
+                                binding.bnTrailler.visibility = View.VISIBLE
+                                urlTriller = "https://www.youtube.com/watch?v=${item.key}"
+                            }
+                            "Teaser" -> {
+                                binding.bnTeaser.visibility = View.VISIBLE
+                                urlTeaser = "https://www.youtube.com/watch?v=${item.key}"
+                            }
+                        }
+                    }
+                }
+                saveMovie()
+            }
+        })
+
+        detailViewModel.setIdMovie(idMovie)
+        detailViewModel.fetchDetailMovie()
     }
 
     override fun onDestroy() {
@@ -171,83 +202,10 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
         binding.appBar.addOnOffsetChangedListener(this)
     }
 
-    private fun setupObserver() {
-        viewModel.setIdMovie(idMovie)
-        viewModel.fetchDetailMovie.observe(viewLifecycleOwner, Observer { result ->
-            when (result) {
-                is Resource.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                }
-                is Resource.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    movie = result.data as DetailMovie
-
-                    val urlImage = "https://image.tmdb.org/t/p/w500${movie.posterPath}"
-                    Glide.with(requireContext()).load(urlImage).placeholder(R.drawable.load)
-                        .into(binding.thumbnailImageheader)
-
-                    binding.txTitle.text = movie.originalTitle
-                    binding.txPlotSynopsis.text = movie.overview
-                    binding.txReleaseDate.text = movie.releaseDate
-                    binding.txUserRating.text = movie.voteAverage.toString()
-                    binding.txBudget.text = movie.budget.toString()
-                    binding.txHomePage.text = movie.homepage
-                    binding.txHomePage.paintFlags = Paint.UNDERLINE_TEXT_FLAG
-                    getVideoMovie()
-                }
-                is Resource.Failure -> {
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(
-                        requireContext(),
-                        "Error loading data movies ${result.exception}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        })
-    }
-
-    private fun getVideoMovie() {
-        viewModel.fetchVideoMovie.observe(viewLifecycleOwner, Observer { result ->
-            when (result) {
-                is Resource.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                }
-                is Resource.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    val videoMovie = result.data as VideoMovie
-                    if (!videoMovie.results.isNullOrEmpty()) {
-                        for (item in videoMovie.results) {
-                            if (item.site == "YouTube") {
-                                when (item.type) {
-                                    "Trailer" -> {
-                                        binding.bnTrailler.visibility = View.VISIBLE
-                                        urlTriller = "https://www.youtube.com/watch?v=${item.key}"
-                                    }
-                                    "Teaser" -> {
-                                        binding.bnTeaser.visibility = View.VISIBLE
-                                        urlTeaser = "https://www.youtube.com/watch?v=${item.key}"
-                                    }
-                                }
-                            }
-                        }
-                        saveMovie()
-                    }
-                }
-                is Resource.Failure -> {
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(
-                        requireContext(),
-                        "Error loading video movies ${result.exception}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        })
-    }
 
     private fun saveMovie() {
-        viewModel.saveMovie(
+        detailViewModel.setContext(requireContext())
+        detailViewModel.saveMovie(
             MovieEntity(
                 movie.id,
                 movie.backdropPath,
@@ -273,6 +231,7 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
     }
 
     private fun updateMovie(isFavorite: Boolean) {
-        viewModel.updataMovie(isFavorite, movie.id)
+        detailViewModel.setContext(requireContext())
+        detailViewModel.updataMovie(isFavorite, movie.id)
     }
 }

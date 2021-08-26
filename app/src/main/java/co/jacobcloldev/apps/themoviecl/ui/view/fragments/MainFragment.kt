@@ -5,11 +5,12 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.*
 import android.widget.CompoundButton
-import android.widget.Toast
+
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.activityViewModels
+
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.NavHostFragment
@@ -19,29 +20,14 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import co.jacobcloldev.apps.themoviecl.R
-import co.jacobcloldev.apps.themoviecl.core.Resource
-import co.jacobcloldev.apps.themoviecl.core.VMFactory
-import co.jacobcloldev.apps.themoviecl.data.db.AppDataBase
 import co.jacobcloldev.apps.themoviecl.data.model.Movie
-import co.jacobcloldev.apps.themoviecl.data.model.MovieEntity
-import co.jacobcloldev.apps.themoviecl.data.network.MovieServices
 import co.jacobcloldev.apps.themoviecl.databinding.FragmentMainBinding
-import co.jacobcloldev.apps.themoviecl.domain.ImplementationRepo
 import co.jacobcloldev.apps.themoviecl.ui.view.MainActivity
 import co.jacobcloldev.apps.themoviecl.ui.view.adapters.MainAdapter
-import co.jacobcloldev.apps.themoviecl.ui.viewmodel.MainViewModel
+import co.jacobcloldev.apps.themoviecl.ui.view.fragments.viewmodel.MovieViewModel
 
-class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener {
-
-   /* private val viewModel by activityViewModels<MainViewModel> {
-        VMFactory(
-            ImplementationRepo(
-                MovieServices(
-                    AppDataBase.getDataBase(requireActivity().applicationContext)
-                )
-            )
-        )
-    }*/
+class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickListener,
+    CompoundButton.OnCheckedChangeListener {
 
     private val movieViewModel: MovieViewModel by viewModels()
 
@@ -80,14 +66,31 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
         setupRecyclerView()
-        setupObserver()
+        //  setupObserver()
         setSwipeRefreshLayout()
         setUpToobar()
+
+        movieViewModel.setContext(requireContext())
+
         binding.bnPreview.setOnClickListener(this)
         binding.bnNext.setOnClickListener(this)
         binding.swFilter.setOnCheckedChangeListener(this)
 
-        movieViewModel.
+        movieViewModel.movieByPage()
+
+        movieViewModel.movie.observe(viewLifecycleOwner, Observer {
+            listMovies.clear()
+            listMovies.addAll(it)
+            mainAdapter.notifyDataSetChanged()
+            if (swipeRefreshLayout.isRefreshing) {
+                swipeRefreshLayout.isRefreshing = false
+            }
+        })
+
+        movieViewModel.isLoading.observe(viewLifecycleOwner, Observer {
+            binding.progressBar.isVisible = it
+        })
+
     }
 
     override fun onDestroyView() {
@@ -104,10 +107,10 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_favorite -> {
-                getMoviesFavorite()
+                movieViewModel.favoriteMovies()
             }
             R.id.action_saved_movies -> {
-                getMoviesSaved()
+                movieViewModel.savedMovies()
             }
         }
         return super.onOptionsItemSelected(item)
@@ -129,14 +132,15 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
                 } else {
                     page -= 1
                     movieViewModel.setPage(page)
-                    movieViewModel.getMoviesUseCase
+           movieViewModel.movieByPage()
                     configureButtonPreview(R.color.purple_500)
                 }
             }
             R.id.bnNext -> {
                 page += 1
                 movieViewModel.setPage(page)
-                movieViewModel.getMoviesUseCase
+
+                movieViewModel.movieByPage()
                 binding.bnPreview.isEnabled = true
                 configureButtonPreview(R.color.purple_500)
                 if (page == 1) {
@@ -169,7 +173,7 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
     private fun setSwipeRefreshLayout() {
         swipeRefreshLayout = binding.swipeRefreshLayout
         swipeRefreshLayout.setOnRefreshListener {
-            setupObserver()
+            movieViewModel.movieByPage()
         }
     }
 
@@ -182,112 +186,23 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
         NavigationUI.setupActionBarWithNavController(mainActivity, navController)
     }
 
-    private fun setupObserver() {
-        viewModel.fetchPopularMoviesList.observe(viewLifecycleOwner, Observer { result ->
-            when (result) {
-                is Resource.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                }
-                is Resource.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    val reponse = result.data as List<Movie>
-                    if (!reponse.isNullOrEmpty()) {
-                        listMovies.clear()
-                        listMovies.addAll(reponse)
-                        mainAdapter.notifyDataSetChanged()
-                        if (swipeRefreshLayout.isRefreshing) {
-                            swipeRefreshLayout.isRefreshing = false
-                        }
-                    }
-                }
-                is Resource.Failure -> {
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(
-                        requireContext(),
-                        "Error loading movies ${result.exception}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-
-        })
+    override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
+        if (isChecked) {
+            filterListMovie()
+        } else {
+            movieViewModel.movieByPage()
+        }
     }
 
-    fun getMoviesFavorite(){
-        viewModel.getMovieFavorite().observe(viewLifecycleOwner, Observer { result ->
-            when (result) {
-                is Resource.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                }
-                is Resource.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    val response = result.data as List<MovieEntity>
-                    listMovies.clear()
-                    for (item in response){
-                        val movie = Movie(item.backdropPath, item.id, item.originalTitle, item.posterPath, item.voteAverage, item.voteCount)
-                        listMovies.add(movie)
-                    }
-                    mainAdapter.notifyDataSetChanged()
-                }
-                is Resource.Failure -> {
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(
-                        requireContext(),
-                        "Error loading movies ${result.exception}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-
-        })
-    }
-
-    fun getMoviesSaved(){
-        viewModel.getMovieSaved().observe(viewLifecycleOwner, Observer { result ->
-            when (result) {
-                is Resource.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                }
-                is Resource.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    val response = result.data as List<MovieEntity>
-                    listMovies.clear()
-                    for (item in response){
-                        val movie = Movie(item.backdropPath, item.id, item.originalTitle, item.posterPath, item.voteAverage, item.voteCount)
-                        listMovies.add(movie)
-                    }
-                    mainAdapter.notifyDataSetChanged()
-                }
-                is Resource.Failure -> {
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(
-                        requireContext(),
-                        "Error loading movies ${result.exception}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-
-        })
-    }
-
-    fun filterListMovie(){
-        var listFilter: ArrayList<Movie> = ArrayList()
-        for (item in listMovies){
-            if (item.voteCount > 2000){
+    private fun filterListMovie() {
+        val listFilter: ArrayList<Movie> = ArrayList()
+        for (item in listMovies) {
+            if (item.voteCount > 2000) {
                 listFilter.add(item)
             }
         }
         listMovies.clear()
         listMovies.addAll(listFilter)
         mainAdapter.notifyDataSetChanged()
-    }
-
-    override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
-        if (isChecked){
-            filterListMovie()
-        } else {
-            setupObserver()
-        }
     }
 }

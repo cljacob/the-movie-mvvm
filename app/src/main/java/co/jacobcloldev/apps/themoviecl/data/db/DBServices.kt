@@ -1,6 +1,6 @@
 package co.jacobcloldev.apps.themoviecl.data.db
 
-import co.jacobcloldev.apps.themoviecl.core.Resource
+
 import co.jacobcloldev.apps.themoviecl.data.model.MovieEntity
 
 class DBServices(private val appDataBase: AppDataBase) {
@@ -12,11 +12,11 @@ class DBServices(private val appDataBase: AppDataBase) {
         appDataBase.movieDao().updateMovie(isFavorite, idMovie)
     }
 
-    suspend fun getMovieSaved(): Resource<List<MovieEntity>> {
-        return Resource.Success(appDataBase.movieDao().getSavedMovies())
+    suspend fun getMovieSaved(): List<MovieEntity> {
+        return appDataBase.movieDao().getSavedMovies()
     }
 
-    suspend fun getMovieFavorite(): Resource<List<MovieEntity>> {
-        return Resource.Success(appDataBase.movieDao().getGetFavoritesMovies())
+    suspend fun getMovieFavorite(): List<MovieEntity> {
+        return appDataBase.movieDao().getGetFavoritesMovies()
     }
 }

@@ -11,7 +11,9 @@ import co.jacobcloldev.apps.themoviecl.domain.GetSaveMoviesUseCase
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class MovieViewModel @Inject constructor(val getMoviesUseCase : GetMoviesUseCase) : ViewModel() {
+class MovieViewModel @Inject constructor(val getMoviesUseCase : GetMoviesUseCase,
+                                         private var getFavoriteMovie: GetFavoriteMovieUseCase,
+                                         private var getSavedMovies: GetSaveMoviesUseCase) : ViewModel() {
 
     private var page = 1
 
@@ -40,8 +42,6 @@ class MovieViewModel @Inject constructor(val getMoviesUseCase : GetMoviesUseCase
         this.context = context
     }
 
-    private var getFavoriteMovie = GetFavoriteMovieUseCase(context)
-
     fun favoriteMovies(){
         viewModelScope.launch {
             isLoading.postValue(true)
@@ -52,8 +52,6 @@ class MovieViewModel @Inject constructor(val getMoviesUseCase : GetMoviesUseCase
             isLoading.postValue(false)
         }
     }
-
-    private var getSavedMovies = GetSaveMoviesUseCase(context)
 
     fun savedMovies(){
         viewModelScope.launch {

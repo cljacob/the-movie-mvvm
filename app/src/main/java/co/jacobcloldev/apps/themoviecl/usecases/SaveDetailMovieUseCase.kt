@@ -1,4 +1,4 @@
-package co.jacobcloldev.apps.themoviecl.domain
+package co.jacobcloldev.apps.themoviecl.usecases
 
 import co.jacobcloldev.apps.themoviecl.data.ImplementationRepo
 import co.jacobcloldev.apps.themoviecl.data.model.MovieEntity

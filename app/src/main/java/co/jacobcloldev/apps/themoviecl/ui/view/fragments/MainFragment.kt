@@ -25,11 +25,12 @@ import co.jacobcloldev.apps.themoviecl.databinding.FragmentMainBinding
 import co.jacobcloldev.apps.themoviecl.ui.view.MainActivity
 import co.jacobcloldev.apps.themoviecl.ui.view.adapters.MainAdapter
 import co.jacobcloldev.apps.themoviecl.ui.view.fragments.viewmodel.MovieViewModel
+import javax.inject.Inject
 
 class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickListener,
     CompoundButton.OnCheckedChangeListener {
 
-    private val movieViewModel: MovieViewModel by viewModels()
+    @Inject lateinit var movieViewModel: MovieViewModel
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
@@ -69,8 +70,6 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
         //  setupObserver()
         setSwipeRefreshLayout()
         setUpToobar()
-
-        movieViewModel.setContext(requireContext())
 
         binding.bnPreview.setOnClickListener(this)
         binding.bnNext.setOnClickListener(this)

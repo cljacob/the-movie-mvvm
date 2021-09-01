@@ -1,23 +1,21 @@
 package co.jacobcloldev.apps.themoviecl.ui.view.fragments.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.jacobcloldev.apps.themoviecl.data.model.Movie
-import co.jacobcloldev.apps.themoviecl.domain.GetFavoriteMovieUseCase
-import co.jacobcloldev.apps.themoviecl.domain.GetMoviesUseCase
-import co.jacobcloldev.apps.themoviecl.domain.GetSaveMoviesUseCase
+import co.jacobcloldev.apps.themoviecl.usecases.GetFavoriteMovieUseCase
+import co.jacobcloldev.apps.themoviecl.usecases.GetMoviesUseCase
+import co.jacobcloldev.apps.themoviecl.usecases.GetSaveMoviesUseCase
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class MovieViewModel @Inject constructor(val getMoviesUseCase : GetMoviesUseCase,
+class MovieViewModel @Inject constructor(private val getMoviesUseCase : GetMoviesUseCase,
                                          private var getFavoriteMovie: GetFavoriteMovieUseCase,
-                                         private var getSavedMovies: GetSaveMoviesUseCase) : ViewModel() {
+                                         private var getSavedMovies: GetSaveMoviesUseCase
+) : ViewModel() {
 
     private var page = 1
-
-    private lateinit var context: Context
 
     val movie = MutableLiveData<List<Movie>>()
     val isLoading = MutableLiveData<Boolean>()
@@ -36,10 +34,6 @@ class MovieViewModel @Inject constructor(val getMoviesUseCase : GetMoviesUseCase
             }
             isLoading.postValue(false)
         }
-    }
-
-    fun setContext(context: Context){
-        this.context = context
     }
 
     fun favoriteMovies(){

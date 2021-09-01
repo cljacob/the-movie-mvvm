@@ -7,17 +7,18 @@ import androidx.lifecycle.viewModelScope
 import co.jacobcloldev.apps.themoviecl.data.model.DetailMovie
 import co.jacobcloldev.apps.themoviecl.data.model.MovieEntity
 import co.jacobcloldev.apps.themoviecl.data.model.VideoMovie
-import co.jacobcloldev.apps.themoviecl.domain.GetMovieByIdUseCase
-import co.jacobcloldev.apps.themoviecl.domain.GetVideoByIdUseCase
-import co.jacobcloldev.apps.themoviecl.domain.SaveDetailMovieUseCase
-import co.jacobcloldev.apps.themoviecl.domain.SaveFavoriteMovieUseCase
+import co.jacobcloldev.apps.themoviecl.usecases.GetMovieByIdUseCase
+import co.jacobcloldev.apps.themoviecl.usecases.GetVideoByIdUseCase
+import co.jacobcloldev.apps.themoviecl.usecases.SaveDetailMovieUseCase
+import co.jacobcloldev.apps.themoviecl.usecases.SaveFavoriteMovieUseCase
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class DetailViewModel @Inject constructor(val getDetailMovieUseCase: GetMovieByIdUseCase,
                                           val getVideoByMovie: GetVideoByIdUseCase,
                                           val savedMovie: SaveDetailMovieUseCase,
-                                          val  updateMovie: SaveFavoriteMovieUseCase) : ViewModel() {
+                                          val  updateMovie: SaveFavoriteMovieUseCase
+) : ViewModel() {
 
     private var idMovie: Long = 0
     private lateinit var context: Context

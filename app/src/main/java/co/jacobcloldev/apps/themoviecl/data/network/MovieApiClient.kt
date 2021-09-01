@@ -2,7 +2,6 @@ package co.jacobcloldev.apps.themoviecl.data.network
 
 import co.jacobcloldev.apps.themoviecl.data.model.DetailMovie
 import co.jacobcloldev.apps.themoviecl.data.model.Movie
-import co.jacobcloldev.apps.themoviecl.data.model.MoviesModel
 import co.jacobcloldev.apps.themoviecl.data.model.VideoMovie
 import retrofit2.Response
 import retrofit2.http.GET

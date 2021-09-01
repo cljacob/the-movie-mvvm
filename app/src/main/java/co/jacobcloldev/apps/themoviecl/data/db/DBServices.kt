@@ -2,8 +2,10 @@ package co.jacobcloldev.apps.themoviecl.data.db
 
 
 import co.jacobcloldev.apps.themoviecl.data.model.MovieEntity
+import javax.inject.Inject
 
-class DBServices(private val appDataBase: AppDataBase) {
+class DBServices @Inject constructor(private val appDataBase: AppDataBase) {
+
     suspend fun saveMovieIntoRoom(movie: MovieEntity){
         appDataBase.movieDao().insertMovie(movie)
     }

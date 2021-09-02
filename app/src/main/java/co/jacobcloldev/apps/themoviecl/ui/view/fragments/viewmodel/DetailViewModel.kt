@@ -1,12 +1,12 @@
 package co.jacobcloldev.apps.themoviecl.ui.view.fragments.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.jacobcloldev.apps.themoviecl.data.model.DetailMovie
 import co.jacobcloldev.apps.themoviecl.data.model.MovieEntity
 import co.jacobcloldev.apps.themoviecl.data.model.VideoMovie
+import co.jacobcloldev.apps.themoviecl.di.ActivityScope
 import co.jacobcloldev.apps.themoviecl.usecases.GetMovieByIdUseCase
 import co.jacobcloldev.apps.themoviecl.usecases.GetVideoByIdUseCase
 import co.jacobcloldev.apps.themoviecl.usecases.SaveDetailMovieUseCase
@@ -14,6 +14,7 @@ import co.jacobcloldev.apps.themoviecl.usecases.SaveFavoriteMovieUseCase
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@ActivityScope
 class DetailViewModel @Inject constructor(val getDetailMovieUseCase: GetMovieByIdUseCase,
                                           val getVideoByMovie: GetVideoByIdUseCase,
                                           val savedMovie: SaveDetailMovieUseCase,
@@ -21,7 +22,6 @@ class DetailViewModel @Inject constructor(val getDetailMovieUseCase: GetMovieByI
 ) : ViewModel() {
 
     private var idMovie: Long = 0
-    private lateinit var context: Context
 
     val isLoading = MutableLiveData<Boolean>()
     val detailMovie = MutableLiveData<DetailMovie>()
@@ -53,10 +53,6 @@ class DetailViewModel @Inject constructor(val getDetailMovieUseCase: GetMovieByI
            }
            isLoading.postValue(false)
         }
-    }
-
-    fun setContext(context: Context){
-        this.context = context
     }
 
     fun saveMovie(movie: MovieEntity){

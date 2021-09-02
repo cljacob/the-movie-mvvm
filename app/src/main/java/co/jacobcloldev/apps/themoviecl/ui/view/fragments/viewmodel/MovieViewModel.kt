@@ -4,12 +4,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.jacobcloldev.apps.themoviecl.data.model.Movie
+import co.jacobcloldev.apps.themoviecl.di.ActivityScope
 import co.jacobcloldev.apps.themoviecl.usecases.GetFavoriteMovieUseCase
 import co.jacobcloldev.apps.themoviecl.usecases.GetMoviesUseCase
 import co.jacobcloldev.apps.themoviecl.usecases.GetSaveMoviesUseCase
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@ActivityScope
 class MovieViewModel @Inject constructor(private val getMoviesUseCase : GetMoviesUseCase,
                                          private var getFavoriteMovie: GetFavoriteMovieUseCase,
                                          private var getSavedMovies: GetSaveMoviesUseCase

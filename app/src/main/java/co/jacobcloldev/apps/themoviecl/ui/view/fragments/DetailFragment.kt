@@ -23,10 +23,11 @@ import co.jacobcloldev.apps.themoviecl.ui.view.MainActivity
 import co.jacobcloldev.apps.themoviecl.ui.view.fragments.viewmodel.DetailViewModel
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
+import javax.inject.Inject
 
 class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.OnClickListener {
 
-    private val detailViewModel: DetailViewModel by viewModels()
+    @Inject lateinit var detailViewModel: DetailViewModel
 
     private var _binding: FragmentDetailBinding? = null
     private val binding get() = _binding!!
@@ -49,6 +50,7 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
         activity?.let {
             mActivity = it
         }
+        (activity as MainActivity).subcomponents.inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -204,7 +206,6 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
 
 
     private fun saveMovie() {
-        detailViewModel.setContext(requireContext())
         detailViewModel.saveMovie(
             MovieEntity(
                 movie.id,
@@ -231,7 +232,6 @@ class DetailFragment : Fragment(), AppBarLayout.OnOffsetChangedListener, View.On
     }
 
     private fun updateMovie(isFavorite: Boolean) {
-        detailViewModel.setContext(requireContext())
         detailViewModel.updataMovie(isFavorite, movie.id)
     }
 }

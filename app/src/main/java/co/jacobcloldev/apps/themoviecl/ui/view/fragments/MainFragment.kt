@@ -52,6 +52,7 @@ class MainFragment : Fragment(), MainAdapter.OnMovieClickListener, View.OnClickL
         activity?.let {
             mActivity = it
         }
+        (activity as MainActivity).subcomponents.inject(this)
     }
 
     override fun onCreateView(

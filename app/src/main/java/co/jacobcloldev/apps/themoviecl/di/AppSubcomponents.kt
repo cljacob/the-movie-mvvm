@@ -1,17 +1,19 @@
 package co.jacobcloldev.apps.themoviecl.di
 
+import co.jacobcloldev.apps.themoviecl.ui.view.MainActivity
 import co.jacobcloldev.apps.themoviecl.ui.view.fragments.DetailFragment
 import co.jacobcloldev.apps.themoviecl.ui.view.fragments.MainFragment
 import dagger.Subcomponent
 
-@Subcomponent(modules = [LisMovieModule::class, DetailMovieModile::class])
+@ActivityScope
+@Subcomponent
 interface AppSubcomponents {
     @Subcomponent.Factory
     interface Factory {
         fun create(): AppSubcomponents
     }
 
-    fun inject(movie: MainFragment)
-
-    fun inject(detailMovie: DetailFragment)
+    fun inject(activity: MainActivity)
+    fun inject(mainFragment: MainFragment)
+    fun inject(detailFragment: DetailFragment)
 }

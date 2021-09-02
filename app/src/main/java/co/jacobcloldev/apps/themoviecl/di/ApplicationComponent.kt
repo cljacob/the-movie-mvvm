@@ -9,6 +9,8 @@ import java.sql.DatabaseMetaData
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [NetworkModule::class, DatabaseModule::class])
+@Component(modules = [NetworkModule::class, DatabaseModule::class, SubcomponentMovieModule::class])
 interface ApplicationComponent {
+
+    fun appSubcomponents(): AppSubcomponents.Factory
 }

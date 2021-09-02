@@ -15,10 +15,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @ActivityScope
-class DetailViewModel @Inject constructor(val getDetailMovieUseCase: GetMovieByIdUseCase,
-                                          val getVideoByMovie: GetVideoByIdUseCase,
-                                          val savedMovie: SaveDetailMovieUseCase,
-                                          val  updateMovie: SaveFavoriteMovieUseCase
+class DetailViewModel @Inject constructor(private val getDetailMovieUseCase: GetMovieByIdUseCase,
+                                          private val getVideoByMovie: GetVideoByIdUseCase,
+                                          private val savedMovie: SaveDetailMovieUseCase,
+                                          private val updateMovie: SaveFavoriteMovieUseCase
 ) : ViewModel() {
 
     private var idMovie: Long = 0
